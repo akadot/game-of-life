@@ -14,7 +14,8 @@ body {
 }
 
 #board {
-  border: 5px solid #21222c;
+  border: 5px solid #5c3ec9;
   border-radius: 5px;
   background-color: #f8f8f2;
+  box-shadow: 0px 0px 10px #5c3ec9;
 }

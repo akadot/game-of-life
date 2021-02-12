@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
   //Adicionando linhas nas colunas
   let grid = new Array(2);
   for (let k = 0; k <= GRID_WIDTH; k++) {
-    grid[k] = new Array();
+    grid[k] = new Array(2);
   }
 
   //Adicionando valores inteiros aleatórios entre 0 e 1 no array
