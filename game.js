@@ -1,5 +1,5 @@
 //GAME RULES:
-//1. Birth Rule: If has 3 neighbors cells lives, create a new cell;
+//1. Birth Rule: If has 3 neighbors cells alive, create a new cell;
 //2. Death Rule: A cell dies if has >=1 or <=4 neighbors;
 //3. Survival Rule: A cell survives only if has 2 or 3 neighbors alive.
 document.addEventListener("DOMContentLoaded", () => {
@@ -15,78 +15,73 @@ document.addEventListener("DOMContentLoaded", () => {
   canvas.width = GRID_WIDTH;
   canvas.height = GRID_HEIGHT;
 
-  //Verificar as regras e desenhar novamente o canvas
-  function startGame(cols, rows, res) {
-    fillGrid(cols, rows);
-    drawGrid(cols, rows, res);
-  }
-  startGame(COL, ROW, RES);
-
-  //Adicionando linhas nas colunas
-  function createGrid(gridSize) {
-    const grid = new Array(2);
-    for (let k = 0; k <= gridSize; k++) {
-      grid[k] = new Array(2);
-    }
-    return grid;
+  //Making a grid and filling with 0 or 1
+  function createGrid(cols, rows) {
+    return new Array(cols)
+      .fill(null)
+      .map(() =>
+        new Array(rows).fill(null).map(() => Math.round(Math.random()))
+      );
   }
 
-  //Adicionando valores inteiros aleatórios entre 0 e 1 no array
-  function fillGrid(cols, rows) {
-    const grid = createGrid(cols);
-    for (let i = 0; i <= cols; i++) {
-      for (let j = 0; j <= rows; j++) {
-        grid[i][j] = Math.round(Math.random());
+  let grid = createGrid(COL, ROW);
+
+  requestAnimationFrame(update);
+  function update() {
+    grid = nextGen(grid);
+    drawGrid(grid, COL, ROW, RES);
+    requestAnimationFrame(update);
+  }
+
+  //Generate nex generation
+  function nextGen(grid) {
+    const nextGen = grid.map((arr) => [...arr]); //make a copy of grid with spread operator
+
+    for (let col = 0; col < grid.length; col++) {
+      for (let row = 0; row < grid[col].length; row++) {
+        const currentCell = grid[col][row];
+        let sumNeighbors = 0; //to verify the total of neighbors
+
+        //Verifying the 8 neigbours of current cell
+        for (let i = -1; i < 2; i++) {
+          for (let j = -1; j < 2; j++) {
+            if (i === 0 && j === 0) {
+              continue; // because this is the current cell's position
+            }
+
+            const x = col + i;
+            const y = row + j;
+
+            if (x >= 0 && y >= 0 && x < COL && y < ROW) {
+              const currentNeighbor = grid[col + i][row + j];
+              sumNeighbors += currentNeighbor;
+            }
+          }
+        }
+
+        //Aplying rules
+        if (currentCell === 0 && sumNeighbors === 3) {
+          nextGen[col][row] = 1;
+        } else if (
+          currentCell === 1 &&
+          (sumNeighbors < 2 || sumNeighbors > 3)
+        ) {
+          nextGen[col][row] = 0;
+        }
       }
     }
-    return grid;
+    return nextGen;
   }
 
-  //Desenhando os pontos no canvas
-  function drawGrid(cols, rows, reslution) {
+  //Draw cells on canvas
+  function drawGrid(grid, cols, rows, reslution) {
     ctx.clearRect(0, 0, cols, rows);
-    for (let i = 0; i <= cols; i++) {
-      for (let j = 0; j <= rows; j++) {
-        if (grid[i][j] === 1) {
-          ctx.fillStyle = "#5c3ec9";
-          ctx.fillRect(i * reslution, j * reslution, reslution, reslution);
-        }
+    for (let i = 0; i < cols; i++) {
+      for (let j = 0; j < rows; j++) {
+        const cell = grid[i][j];
+        ctx.fillStyle = cell ? "#5c3ec9" : "#f8f8f2";
+        ctx.fillRect(i * reslution, j * reslution, reslution, reslution);
       }
     }
   }
-  /*
-  function checkLives(cols, rows, res) {
-    let next = createGrid(cols, rows);
-    let grid = drawGrid(cols, rows, res);
-    for (let i = 0; i <= cols; i++) {
-      for (let j = 0; j <= rows; j++) {
-        let state = grid[i][j];
-        if (i == 0 || i == cols - 1 || j == 0 || j == rows - 1) {
-          next[i][j] = state;
-        }
-        let neighbors = countNeighbors(next, i, j);
-
-        if (state == 0 && neighbors == 3) {
-          next[i][j] = 1;
-        } else if (state == 1 && (neighbors < 2 || neighbors > 3)) {
-          next[i][j] = 0;
-        } else {
-          next[i][j] = state;
-        }
-      }
-    }
-    grid = next;
-    return grid;
-  }
-
-  function countNeighbors(grid, x, y) {
-    let sum = 0;
-    for (let i = -1; i < 2; i++) {
-      for (let j = -1; j < 2; j++) {
-        sum += grid[i][j];
-      }
-    }
-    sum -= grid[x][y]; //to remove itself from count
-    return sum;
-  }*/
 });
